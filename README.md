@@ -1,4 +1,4 @@
-# Monitoring_the_test_process-Effective_mobile
+# Monitoring_the_test_process-Effective_mobile-
 
 Выполненное тестовое задание на позицию DevOps-инженера в компанию Effective Mobile
 
