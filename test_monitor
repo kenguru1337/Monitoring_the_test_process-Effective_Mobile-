@@ -1,0 +1,9 @@
+/var/log/monitoring.log {
+    size 50M             
+    rotate 70           
+    compress             
+    delaycompress        
+    missingok            
+    notifempty           
+    create 644 root root 
+}

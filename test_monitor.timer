@@ -1,0 +1,10 @@
+[Unit]
+Description=Таймер для мониторинга процесса test
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=60s
+Unit=test_monitor.service
+
+[Install]
+WantedBy=timers.target
