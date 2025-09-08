@@ -34,22 +34,22 @@
 * `/etc/logrotate.d/test_monitor` — конфиг ротации логов.
 
 ### Установка
-1. Переместить скрипт в `/usr/local/bin/` и сделать его исполняемым:
+1. Необходимо переместить скрипт в `/usr/local/bin/` и сделать его исполняемым:
 ```console
 sudo mv test_monitor.sh /usr/local/bin/test_monitor.sh
 sudo chmod +x /usr/local/bin/test_monitor.sh
 ```
-2. Переместить systemd unit и timer:
+2. Необходимо переместить systemd unit и timer:
 ```console
 sudo mv test_monitor.service /etc/systemd/system/
 sudo mv test_monitor.timer /etc/systemd/system/
 ```
-3. Активировать таймер:
+3. Далее активировать таймер:
 ```console
 sudo systemctl daemon-reload
 sudo systemctl enable --now test_monitor.timer
 ```
-4. Переместить конфиг logrotate:
+4. Также надо переместить конфиг logrotate:
 ```console
 sudo mv test_monitor /etc/logrotate.d/test_monitor
 ```
@@ -67,7 +67,7 @@ cat /var/log/monitoring.log
 systemctl list-timers | grep test_monitor
 ```
 Вывод должен содержать строчку с `test_monitor.timer` и временем следующего запуска.
-Посмотреть логи выполнения юнита:
+Смотрим логи выполнения юнита:
 ```console
 journalctl -u test_monitor.service -f
 ```
@@ -85,6 +85,60 @@ sudo logrotate -d /etc/logrotate.d/test_monitor
 ```console
 sudo logrotate -f /etc/logrotate.d/test_monitor
 ```
-4. Проверка поведения скрипта
 
-   1) Процесс test отсутствует
+4. Проверка поведения скрипта
+   
+4.1 Процесс test отсутствует
+
+Останавливаем процесс (если он есть):
+```console
+pkill test || true
+sudo /usr/local/bin/test_monitor.sh
+cat /var/log/monitoring.log
+```
+В логе появится строка:
+```console
+YYYY-MM-DD HH:MM:SS - Процесс 'test' не запущен
+```
+4.2 Процесс работает
+
+Создаем тестовый процесс:
+```console
+exec -a test sleep 1000 &
+sudo /usr/local/bin/test_monitor.sh
+```
+Смотрим в лог:
+```console
+tail -n 5 /var/log/monitoring.log
+```
+В логе будет информация о проверке процесса:
+```console
+YYYY-MM-DD HH:MM:SS - Проверка процесса 'test' (PID: 12345)
+```
+4.3 Перезапуск процесса
+
+Остановите процесс:
+```console
+pkill test
+```
+Создайте новый процесс:
+```console
+exec -a test sleep 1000 &
+```
+Запустите скрипт:
+```console
+sudo /usr/local/bin/test_monitor.sh
+```
+В логе появится запись:
+```console
+YYYY-MM-DD HH:MM:SS - Процесс 'test' был перезапущен (PID: 12345)
+```
+
+4.4 Параллельные запуски
+
+Запустить скрипт дважды одновременно:
+```console
+sudo /usr/local/bin/test_monitor.sh &
+sudo /usr/local/bin/test_monitor.sh &
+```
+Второй запуск завершится сразу, не повредив лог и PID-файл.
